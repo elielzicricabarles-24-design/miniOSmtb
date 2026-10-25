@@ -1,17 +1,15 @@
 import os
 import sys
+import platform
 
 from filesystem import FileSystem   # <-- File Management module
+import users                        # <-- User management
+import memorymanager as mm          # <-- Process & Memory management
 
-fs = FileSystem()                    # <-- one shared file system for the session
-
-# STUDENT 5 ADDITION: User management and system information
-import platform
-import users
+fs = FileSystem()                   # <-- one shared file system for the session
 
 def clear_screen():
     os.system('cls' if os.name == 'nt' else 'clear')
-
 
 def display_help():
     print("\nAvailable Commands:")
@@ -20,7 +18,7 @@ def display_help():
     print(" exit                -Shut down MiniOS")
 
     # Under File Management
-    print("")
+    print("\n--- File Management ---")
     print(" dir [folder]        -List files and folders")
     print(" mkdir <folder>      -Create a new directory")
     print(" create <file> [text]-Create a new file")
@@ -32,32 +30,28 @@ def display_help():
     print(" pwd                 -Show the current directory")
 
     # Under Process Management
-    print("")
-    print("")
-    print("")
-    print("")
+    print("\n--- Process Management ---")
+    print(" process             -View all processes")
+    print(" process <id> <name> -Create a new process")
+    print(" run <id>            -Run a process")
+    print(" kill <id>           -Kill a process")
 
     # Under Memory Management
+    print("\n--- Memory Management ---")
+    print(" memory              -View memory status")
+    print(" allocate <id> <MB>  -Allocate memory to a process")
+    print(" free <id>           -Free memory from a process")
     print("")
-    print("")
-    print("")
-    print("")
-    print("")
-    print("")
-    print("")
-
 
 def exit_os():
     print("\nMiniOSMTB is shutting down... \nBye, I'll miss you")
     sys.exit(0)
 
 def show(result):
-    """Print a file system result (skips empty strings, e.g. after cd)."""
+    """Print a file system/module result (skips empty strings)."""
     if result:
         print("\n" + result + "\n")
 
-
-# STUDENT 5 ADDITION: System information command
 def show_systeminfo():
     print("\n========================================")
     print("           SYSTEM INFORMATION")
@@ -71,21 +65,20 @@ def show_systeminfo():
     print("========================================\n")
 
 
-# Brain of our code, means your logic is supposed to be inserted under defmain()
 def main():
     clear_screen()
     print("========================================================================================================================")
-    print("                                                       MINIOS MTB                                                                                            ")
+    print("                                                       MINIOS MTB                                                       ")
     print("========================================================================================================================")
     print("\nWelcome to MiniOSMTB!\n")
 
-# STUDENT 5 ADDITION: Require a successful login before using MiniOS
     if users.login() is None:
         return
 
     while True:
         try:
-            user_input = input("MiniOSMTB>").strip()
+            current_path = fs.pwd().strip()
+            user_input = input(f"MiniOSMTB:{current_path}> ").strip()
             if not user_input:
                 continue
 
@@ -99,6 +92,7 @@ def main():
                 display_help()
             elif command == "clear":
                 clear_screen()
+                
             # ---------------- File Management ----------------
             elif command == "dir":
                 show(fs.dir(args[0] if args else None))
@@ -125,11 +119,40 @@ def main():
             elif command == "pwd":
                 show(fs.pwd())
 
-            # ---------------- Process Management (teammate) ----------------
+            # ---------------- Process Management ----------------
+            elif command == "process":
+                if len(args) == 0:
+                    show(mm.list_processes())
+                elif len(args) < 2:
+                    show("Usage: process <id> <name>")
+                else:
+                    show(mm.create_process(args[0], " ".join(args[1:])))
+            elif command == "run":
+                if len(args) < 1:
+                    show("Usage: run <id>")
+                else:
+                    show(mm.run_process(args[0]))
+            elif command == "kill":
+                if len(args) < 1:
+                    show("Usage: kill <id>")
+                else:
+                    show(mm.kill_process(args[0]))
 
-            # ---------------- Memory Management (teammate) -----------------
+            # ---------------- Memory Management -----------------
+            elif command == "memory":
+                show(mm.show_memory())
+            elif command == "allocate":
+                if len(args) < 2:
+                    show("Usage: allocate <id> <size>")
+                else:
+                    show(mm.allocate_memory(args[0], args[1]))
+            elif command == "free":
+                if len(args) < 1:
+                    show("Usage: free <id>")
+                else:
+                    show(mm.free_memory(args[0]))
 
-            # STUDENT 5 ADDITION: User and system commands
+            # ---------------- User & System Commands ----------------
             elif command == "whoami":
                 users.whoami()
             elif command == "systeminfo":
@@ -140,10 +163,8 @@ def main():
 
         except KeyboardInterrupt:
             exit_os()
-
-        # STUDENT 5 ADDITION: Catch unexpected errors so the CLI can continue
         except Exception as error:
-            print(f"\nError: The command could not be completed: {error}")
+            print(f"\nError: The command could not be completed: {error}\n")
 
 if __name__ == "__main__":
     main()
