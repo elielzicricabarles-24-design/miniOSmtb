@@ -32,8 +32,8 @@ def display_help():
     # Under Process Management
     print("\n--- Process Management ---")
     print(" process             -View all processes")
-    print(" process <id> <name> -Create a new process")
-    print(" run <id>            -Run a process")
+    print(" run <name>          -Create a new process")
+    print(" start <id>            -Run a process")
     print(" kill <id>           -Kill a process")
 
     # Under Memory Management
@@ -121,23 +121,18 @@ def main():
 
             # ---------------- Process Management ----------------
             elif command == "process":
-                if len(args) == 0:
-                    show(mm.list_processes())
-                elif len(args) < 2:
-                    show("Usage: process <id> <name>")
-                else:
-                    show(mm.create_process(args[0], " ".join(args[1:])))
+                show(mm.list_processes())
             elif command == "run":
                 if len(args) < 1:
-                    show("Usage: run <id>")
+                    show("Usage: run <name>")
                 else:
-                    show(mm.run_process(args[0]))
+                    show(mm.run_process(" ".join(args)))
             elif command == "kill":
                 if len(args) < 1:
                     show("Usage: kill <id>")
                 else:
                     show(mm.kill_process(args[0]))
-
+            
             # ---------------- Memory Management -----------------
             elif command == "memory":
                 show(mm.show_memory())

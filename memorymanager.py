@@ -1,16 +1,15 @@
-# memorymanager.py
+# State variables
+processes = {}
+memory_blocks = {}
+TOTAL_MEMORY = 1024
+available_memory = TOTAL_MEMORY
+next_pid = 1  # <-- Added to track auto-generated PIDs
 
 class Process:
     def __init__(self, pid, name):
         self.pid = pid
         self.name = name
         self.state = "READY"
-
-# State variables
-processes = {}
-memory_blocks = {}
-TOTAL_MEMORY = 1024
-available_memory = TOTAL_MEMORY
 
 def list_processes():
     if not processes:
@@ -20,17 +19,15 @@ def list_processes():
         result += f"{p.pid}\t{p.name}\t\t{p.state}\n"
     return result.strip()
 
-def create_process(pid, name):
-    if pid in processes:
-        return f"Process {pid} already exists."
+def run_process(name):
+    global next_pid
+    pid = str(next_pid) # Convert to string to match existing logic
+    next_pid += 1
+    
     processes[pid] = Process(pid, name)
-    return f"Process [{pid}] '{name}' created."
-
-def run_process(pid):
-    if pid not in processes:
-        return f"Process {pid} not found."
     processes[pid].state = "RUNNING"
-    return f"Process [{pid}] ({processes[pid].name}) is now running."
+    
+    return f"Process started.\n\nPID: {pid}\nName: {name}\nStatus: RUNNING"
 
 def kill_process(pid):
     global available_memory
@@ -38,15 +35,16 @@ def kill_process(pid):
         return f"Process {pid} not found."
     
     msg = ""
-    # Auto-free memory if the process had any allocated
     if pid in memory_blocks:
         size = memory_blocks.pop(pid)
         available_memory += size
         msg += f"Freed {size}MB from Process [{pid}].\n"
         
     processes[pid].state = "TERMINATED"
-    msg += f"Process [{pid}] has been killed."
+    msg += f"Process {pid} terminated."
     return msg
+
+# (Keep your existing show_memory, allocate_memory, and free_memory functions here)
 
 def show_memory():
     status = "--- Memory Status ---\n"

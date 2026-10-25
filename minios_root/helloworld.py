@@ -1,1 +1,0 @@
-kamusta kada noy?
