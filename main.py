@@ -43,6 +43,11 @@ def display_help():
     print(" free <id>           -Free memory from a process")
     print("")
 
+    print("--- User & System Commands ---")
+    print(" whoami              -Show current user")
+    print(" systeminfo          -Show system information")
+    print("")
+
 def exit_os():
     print("\nMiniOSMTB is shutting down... \nBye, I'll miss you")
     sys.exit(0)
